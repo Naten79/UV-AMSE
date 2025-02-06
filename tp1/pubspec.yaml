@@ -1,5 +1,5 @@
-name: Rapp
-description: Application de gestion de musiques de type rap.
+name: Fish'app
+description: Application de découverte de poissons.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
@@ -23,3 +23,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/data/poissons.json
+    - assets/images/poisson_ange_imperial.jpg
+    - assets/images/poisson_ange_royal.jpg
+    - assets/images/poisson_betta.jpg
+    - assets/images/poisson_discus.jpg
+    - assets/images/poisson_licorne_bleu.jpg
+    - assets/images/poisson_mandarin.jpg
+    - assets/images/poisson_papillon_a_bandes.jpg
+    - assets/images/poisson_perroquet_royal.jpg
