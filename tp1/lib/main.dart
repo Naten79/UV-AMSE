@@ -1,206 +1,259 @@
-import 'package:english_words/english_words.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+class Fish {
+  final String name;
+  final String latinName;
+  final String family;
+  final double adultSize;
+  final double adultWeight;
+  final String diet;
+  final String habitat;
+  final String region;
+  final String waterTemperature;
+  final String description;
+  final String image;
+
+  Fish({
+    required this.name,
+    required this.latinName,
+    required this.family,
+    required this.adultSize,
+    required this.adultWeight,
+    required this.diet,
+    required this.habitat,
+    required this.region,
+    required this.waterTemperature,
+    required this.description,
+    required this.image,
+  });
+
+  factory Fish.fromJson(Map<String, dynamic> json) {
+    return Fish(
+      name: json['name'],
+      latinName: json['latinName'],
+      family: json['family'],
+      adultSize: (json['adultSize'] as num).toDouble(),
+      adultWeight: (json['adultWeight'] as num).toDouble(),
+      diet: json['diet'],
+      habitat: json['habitat'],
+      region: json['region'],
+      waterTemperature: json['waterTemperature'],
+      description: json['description'],
+      image: json['image'],
+    );
+  }
+}
+
+class MyAppState extends ChangeNotifier {
+  List<Fish> fishList = [];
+  List<Fish> likedFish = [];
+
+  MyAppState() {
+    _loadFishData();
+  }
+
+  Future<void> _loadFishData() async {
+    try {
+      final String response = await rootBundle.loadString('assets/data/poissons.json');
+      final List<dynamic> data = json.decode(response);
+      fishList = data.map((json) => Fish.fromJson(json)).toList();
+      notifyListeners();
+    } catch (e) {
+      print('Erreur lors du chargement du JSON: $e');
+    }
+  }
+
+  void toggleLike(Fish fish) {
+    if (likedFish.contains(fish)) {
+      likedFish.remove(fish);
+    } else {
+      likedFish.add(fish);
+    }
+    notifyListeners();
+  }
+}
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Namer App',
+        title: 'FishApp',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 38, 161, 59)),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         ),
-        home: MyHomePage(),
+        home: MainScreen(),
       ),
     );
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
-
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-
-  // ↓ Add the code below.
-  var favorites = <WordPair>[];
-
-  void toggleFavorite() {
-    if (favorites.contains(current)) {
-      favorites.remove(current);
-    } else {
-      favorites.add(current);
-    }
-    notifyListeners();
-  }
-}
-
-class MyHomePage extends StatefulWidget {
+class MainScreen extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    MyHomePage(),
+    LikesPage(),
+    AboutPage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = GeneratorPage();
-        break;
-      case 1:
-        page = FavoritesPage();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
-
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: Row(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Fish'app"),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600,  // ← Here.
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
-                  setState(() {
-                    selectedIndex = value;
-                  });
-                },
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text(
+                'Menu',
+                style: TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
-              ),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('Home'),
+              onTap: () {
+                _onItemTapped(0);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.favorite),
+              title: Text('Likes'),
+              onTap: () {
+                _onItemTapped(1);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('About'),
+              onTap: () {
+                _onItemTapped(2);
+                Navigator.pop(context);
+              },
             ),
           ],
         ),
-      );
-    });
+      ),
+      body: _pages[_selectedIndex],
+    );
   }
 }
 
-
-class GeneratorPage extends StatelessWidget {
+class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    var pair = appState.current;
 
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
+    return appState.fishList.isEmpty
+        ? Center(child: CircularProgressIndicator())
+        : ListView.builder(
+            itemCount: appState.fishList.length,
+            itemBuilder: (context, index) {
+              return FishCard(fish: appState.fishList[index]);
+            },
+          );
+  }
+}
 
+class LikesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    return appState.likedFish.isEmpty
+        ? Center(child: Text("Aucun poisson aimé"))
+        : ListView.builder(
+            itemCount: appState.likedFish.length,
+            itemBuilder: (context, index) {
+              return FishCard(fish: appState.likedFish[index]);
+            },
+          );
+  }
+}
+
+class AboutPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          BigCard(pair: pair),
-          SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
-          ),
-        ],
+      child: Text(
+        "Application de découverte d'espèces de poissons développée par Nathan DELAUNAY",
+        textAlign: TextAlign.center,
       ),
     );
   }
 }
 
-class FavoritesPage extends StatelessWidget {
+class FishCard extends StatelessWidget {
+  final Fish fish;
+
+  const FishCard({Key? key, required this.fish}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-
-    if (appState.favorites.isEmpty) {
-      return Center(
-        child: Text('No favorites yet.'),
-      );
-    }
-
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text('You have '
-              '${appState.favorites.length} favorites:'),
-        ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
-          ),
-      ],
-    );
-  }
-}
-
-class BigCard extends StatelessWidget {
-  const BigCard({
-    super.key,
-    required this.pair,
-  });
-
-  final WordPair pair;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // ↓ Add this.
-    final style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-    );
+    bool isLiked = appState.likedFish.contains(fish);
 
     return Card(
-      color: theme.colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        // ↓ Change this line.
-        child: Text(pair.asLowerCase, style: style),
+      margin: EdgeInsets.all(10),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+            child: Image.asset(
+              fish.image,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  fish.name,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: Icon(isLiked ? Icons.favorite : Icons.favorite_border, color: isLiked ? Colors.red : null),
+                  onPressed: () {
+                    appState.toggleLike(fish);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
