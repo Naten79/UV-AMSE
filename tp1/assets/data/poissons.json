@@ -36,7 +36,7 @@
       "region": "Mer Rouge, Océan Indien",
       "waterTemperature": "24-27°C",
       "description": "Ce poisson aux motifs jaunes et noirs vit en couple et se nourrit principalement de coraux et d’invertébrés marins. Il est très apprécié en aquariophilie.",
-      "image": "assets/images/poisson_papillon.jpg"
+      "image": "assets/images/poisson_papillon_a_bandes.jpg"
     },
     {
       "name": "Poisson-licorne bleu",
@@ -49,7 +49,7 @@
       "region": "Océan Indien, Pacifique",
       "waterTemperature": "23-27°C",
       "description": "Reconnaissable à sa corne frontale, ce poisson élégant de couleur bleutée est un excellent nageur et joue un rôle écologique important en broutant les algues des récifs.",
-      "image": "assets/images/poisson_licorne.jpg"
+      "image": "assets/images/poisson_licorne_bleu.jpg"
     },
     {
       "name": "Poisson-perroquet royal",
@@ -62,7 +62,7 @@
       "region": "Océan Atlantique Ouest, Caraïbes",
       "waterTemperature": "24-28°C",
       "description": "Avec ses couleurs éclatantes et son bec puissant, ce poisson broie le corail pour en extraire les algues et façonne indirectement les plages de sable blanc.",
-      "image": "assets/images/poisson_perroquet.jpg"
+      "image": "assets/images/poisson_perroquet_royal.jpg"
     },
     {
       "name": "Poisson-discus",
