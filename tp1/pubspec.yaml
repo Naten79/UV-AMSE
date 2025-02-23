@@ -1,4 +1,4 @@
-name: Fish'app
+name: Fishapp
 description: Application de découverte de poissons.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -33,3 +33,14 @@ flutter:
     - assets/images/poisson_mandarin.jpg
     - assets/images/poisson_papillon_a_bandes.jpg
     - assets/images/poisson_perroquet_royal.jpg
+    - assets/images/poisson_mandarin.jpg
+    - assets/images/barbeau.jpg
+    - assets/images/carpe_koi.jpg
+    - assets/images/guppy.jpg
+    - assets/images/poisson_chat.jpg
+    - assets/images/poisson_clown.jpg
+    - assets/images/poisson_globe.jpg
+    - assets/images/poisson_scorpion.jpg
+    - assets/images/tetra_neon.jpg
+    
+
