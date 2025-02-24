@@ -9,11 +9,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text("Tak1Couille")),
+        appBar: AppBar(title: Text("Tak1")),
         body: Center(
           child: Image.network(
             'https://picsum.photos/512/512',
-
           ),
         ),
       ),
