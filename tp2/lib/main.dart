@@ -11,20 +11,11 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: Text("Tak1")),
         body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Center(
-              child: Image.network(
-                'https://picsum.photos/512/512',
-              ),
-            ),
+            Expanded(child: ImageGridWidget()),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: SliderExample(),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TileWidget(),
             ),
           ],
         ),
@@ -72,47 +63,31 @@ class _SliderExampleState extends State<SliderExample> {
   }
 }
 
-class Tile {
-  String imageURL;
-  Alignment alignment;
-
-  Tile({required this.imageURL, required this.alignment});
-
-  Widget croppedImageTile() {
-    return FittedBox(
-      fit: BoxFit.fill,
-      child: ClipRect(
-        child: Container(
-          child: Align(
-            alignment: this.alignment,
-            widthFactor: 0.3,
-            heightFactor: 0.3,
-            child: Image.network(this.imageURL),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class TileWidget extends StatelessWidget {
-  final Tile tile = Tile(
-      imageURL: 'https://picsum.photos/512', alignment: Alignment(0, 0));
+class ImageGridWidget extends StatelessWidget {
+  final String imageUrl = 'https://picsum.photos/512/512';
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 150.0,
-      height: 150.0,
-      child: Container(
-        margin: EdgeInsets.all(20.0),
-        child: InkWell(
-          child: tile.croppedImageTile(),
-          onTap: () {
-            print("Tapped on tile");
-          },
-        ),
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
       ),
+      itemCount: 9,
+      itemBuilder: (context, index) {
+        int row = index ~/ 3;
+        int col = index % 3;
+        return ClipRect(
+          child: Align(
+            alignment: Alignment(
+              -1.0 + col * 1.0,
+              -1.0 + row * 1.0,
+            ),
+            widthFactor: 1 / 3,
+            heightFactor: 1 / 3,
+            child: Image.network(imageUrl, fit: BoxFit.cover),
+          ),
+        );
+      },
     );
   }
 }
