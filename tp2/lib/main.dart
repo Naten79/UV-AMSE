@@ -13,9 +13,7 @@ class MyApp extends StatelessWidget {
         body: Center(
           child: Image.network(
             'https://picsum.photos/512/512',
-            errorBuilder: (context, error, stackTrace) {
-              return Text('Erreur de chargement de limage');
-            },
+
           ),
         ),
       ),
