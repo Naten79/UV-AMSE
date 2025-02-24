@@ -15,8 +15,8 @@ class Fish {
   final String waterTemperature;
   final String description;
   final String image;
-  final String type; // Nouveau champ
-  final String regime; // Nouveau champ
+  final String type;
+  final String regime;
 
   Fish({
     required this.name,
@@ -30,8 +30,8 @@ class Fish {
     required this.waterTemperature,
     required this.description,
     required this.image,
-    required this.type, // Nouveau champ
-    required this.regime, // Nouveau champ
+    required this.type,
+    required this.regime,
   });
 
   factory Fish.fromJson(Map<String, dynamic> json) {
@@ -47,8 +47,8 @@ class Fish {
       waterTemperature: json['waterTemperature'],
       description: json['description'],
       image: json['image'],
-      type: json['type'], // Lecture du nouveau champ
-      regime: json['regime'], // Lecture du nouveau champ
+      type: json['type'],
+      regime: json['regime'],
     );
   }
 }
@@ -56,8 +56,6 @@ class Fish {
 class MyAppState extends ChangeNotifier {
   List<Fish> fishList = [];
   List<Fish> likedFish = [];
-  String selectedHabitat = 'Tous'; // Filtre pour l'habitat
-  String selectedRegime = 'Tous'; // Filtre pour le régime
 
   MyAppState() {
     _loadFishData();
@@ -80,25 +78,6 @@ class MyAppState extends ChangeNotifier {
     } else {
       likedFish.add(fish);
     }
-    notifyListeners();
-  }
-
-  List<Fish> get filteredFishList {
-    if (fishList.isEmpty) return []; // Ajout d'une vérification ici
-    return fishList.where((fish) {
-      final habitatMatch = selectedHabitat == 'Tous' || fish.type == selectedHabitat;
-      final regimeMatch = selectedRegime == 'Tous' || fish.regime == selectedRegime;
-      return habitatMatch && regimeMatch;
-    }).toList();
-  }
-
-  void setSelectedHabitat(String habitat) {
-    selectedHabitat = habitat;
-    notifyListeners();
-  }
-
-  void setSelectedRegime(String regime) {
-    selectedRegime = regime;
     notifyListeners();
   }
 }
@@ -198,62 +177,15 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
 
-    return Column(
-      children: [
-        _buildFilterSection(context),
-        Expanded(
-          child: appState.fishList.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : appState.filteredFishList.isEmpty
-                  ? Center(child: Text("Aucun poisson correspondant aux filtres"))
-                  : ListView.builder(
-                      itemCount: appState.filteredFishList.length,
-                      itemBuilder: (context, index) {
-                        return FishCard(fish: appState.filteredFishList[index]);
-                      },
-                    ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilterSection(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        DropdownButton<String>(
-          value: appState.selectedHabitat,
-          items: <String>['Tous', 'Eau douce', 'Eau salée']
-              .map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              appState.setSelectedHabitat(newValue);
-            }
-          },
-        ),
-        DropdownButton<String>(
-          value: appState.selectedRegime,
-          items: <String>['Tous', 'Herbivore', 'Carnivore', 'Omnivore']
-              .map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              appState.setSelectedRegime(newValue);
-            }
-          },
-        ),
-      ],
+    return Expanded(
+      child: appState.fishList.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: appState.fishList.length,
+              itemBuilder: (context, index) {
+                return FishCard(fish: appState.fishList[index]);
+              },
+            ),
     );
   }
 }
@@ -377,60 +309,11 @@ class FishDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    fish.name,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
+                  Text(fish.name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
-                  Text(
-                    'Nom latin: ${fish.latinName}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Famille: ${fish.family}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Taille adulte: ${fish.adultSize} cm',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Masse adulte: ${fish.adultWeight} kg',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Régime alimentaire: ${fish.diet}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Habitat: ${fish.habitat}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Région: ${fish.region}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Température: ${fish.waterTemperature}',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  Text('Nom latin: ${fish.latinName}', style: TextStyle(fontSize: 16)),
                   SizedBox(height: 8),
-                  Text(
-                    'Description:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    fish.description,
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  Text(fish.description, style: TextStyle(fontSize: 16)),
                 ],
               ),
             ),
