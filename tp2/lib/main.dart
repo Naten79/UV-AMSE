@@ -1,93 +1,78 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
+class Tile {
+  String imageURL;
+  Alignment alignment;
+
+  Tile({required this.imageURL, required this.alignment});
+
+  Widget croppedImageTile() {
+    return FittedBox(
+      fit: BoxFit.fill,
+      child: ClipRect(
+        child: Align(
+          alignment: alignment,
+          widthFactor: 0.3,
+          heightFactor: 0.3,
+          child: Image.network(imageURL),
+        ),
+      ),
+    );
+  }
 }
 
-class MyApp extends StatelessWidget {
+Tile tile = Tile(
+  imageURL: 'https://picsum.photos/512',
+  alignment: Alignment(0, 0),
+);
+
+class DisplayTileWidget extends StatelessWidget {
+  const DisplayTileWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text("Tak1")),
-        body: Column(
-          children: <Widget>[
-            Expanded(child: ImageGridWidget()),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SliderExample(),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Display a Tile as a Cropped Image'),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 150.0,
+              height: 150.0,
+              child: Container(
+                margin: const EdgeInsets.all(20.0),
+                child: createTileWidgetFrom(tile),
+              ),
+            ),
+            SizedBox(
+              height: 200,
+              child: Image.network(
+                'https://picsum.photos/512',
+                fit: BoxFit.cover,
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class SliderExample extends StatefulWidget {
-  const SliderExample({super.key});
-
-  @override
-  State<SliderExample> createState() => _SliderExampleState();
-}
-
-class _SliderExampleState extends State<SliderExample> {
-  double _currentSliderPrimaryValue = 0.2;
-  double _currentSliderSecondaryValue = 0.5;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Slider(
-          value: _currentSliderPrimaryValue,
-          secondaryTrackValue: _currentSliderSecondaryValue,
-          label: _currentSliderPrimaryValue.round().toString(),
-          onChanged: (double value) {
-            setState(() {
-              _currentSliderPrimaryValue = value;
-            });
-          },
-        ),
-        Slider(
-          value: _currentSliderSecondaryValue,
-          label: _currentSliderSecondaryValue.round().toString(),
-          onChanged: (double value) {
-            setState(() {
-              _currentSliderSecondaryValue = value;
-            });
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class ImageGridWidget extends StatelessWidget {
-  final String imageUrl = 'https://picsum.photos/512/512';
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-      ),
-      itemCount: 9,
-      itemBuilder: (context, index) {
-        int row = index ~/ 3;
-        int col = index % 3;
-        return ClipRect(
-          child: Align(
-            alignment: Alignment(
-              -1.0 + col * 1.0,
-              -1.0 + row * 1.0,
-            ),
-            widthFactor: 1 / 3,
-            heightFactor: 1 / 3,
-            child: Image.network(imageUrl, fit: BoxFit.cover),
-          ),
-        );
+  Widget createTileWidgetFrom(Tile tile) {
+    return InkWell(
+      child: tile.croppedImageTile(),
+      onTap: () {
+        debugPrint("Tapped on tile");
       },
     );
   }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: DisplayTileWidget(),
+  ));
 }
