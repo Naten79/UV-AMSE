@@ -8,10 +8,10 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Transformations d\'Images',
       debugShowCheckedModeBanner: false,
       home: const HomeScreen(),
     );
@@ -20,7 +20,6 @@ class MyApp extends StatelessWidget {
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,30 +29,54 @@ class HomeScreen extends StatelessWidget {
           children: [
             const DrawerHeader(
               decoration: BoxDecoration(color: Colors.blue),
-              child: Text("Menu", style: TextStyle(color: Colors.white, fontSize: 24)),
+              child: Text(
+                "Menu",
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
             ),
             ListTile(
               title: const Text("Exo 1 - Image Simple"),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const Exo1Screen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Exo1Screen()),
+                );
               },
             ),
             ListTile(
               title: const Text("Exo 2 - Transformations"),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const Exo2Screen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Exo2Screen()),
+                );
               },
             ),
             ListTile(
-              title: const Text("Exo 4 - Affichage d'une tuile"), // Ajoute ton Exo 4 ici
+              title: const Text("Exo 4 - Affichage d'une tuile"),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const Exo4Screen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Exo4Screen()),
+                );
               },
             ),
             ListTile(
               title: const Text("Exo 5 - Plateau de tuiles"),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const Exo5Screen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Exo5Screen()),
+                );
+              },
+            ),
+            ListTile(
+              title: const Text("Exo 6 - Échange de tuiles d'image"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Exo6Screen()),
+                );
               },
             ),
           ],
@@ -64,10 +87,8 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// 📌 Exo 1 : Affichage simple de l'image
 class Exo1Screen extends StatelessWidget {
   const Exo1Screen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,10 +105,8 @@ class Exo1Screen extends StatelessWidget {
   }
 }
 
-// 📌 Exo 2 : Transformations avec Sliders
 class Exo2Screen extends StatefulWidget {
   const Exo2Screen({super.key});
-
   @override
   _Exo2ScreenState createState() => _Exo2ScreenState();
 }
@@ -107,10 +126,14 @@ class _Exo2ScreenState extends State<Exo2Screen> {
             child: Center(
               child: Transform(
                 alignment: Alignment.center,
-                transform: Matrix4.identity()
-                  ..rotateZ(_rotation)
-                  ..scale(_mirror ? -_scale : _scale, _scale),
-                child: Image.network('https://picsum.photos/512', fit: BoxFit.cover),
+                transform:
+                    Matrix4.identity()
+                      ..rotateZ(_rotation)
+                      ..scale(_mirror ? -_scale : _scale, _scale),
+                child: Image.network(
+                  'https://picsum.photos/512',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -137,11 +160,10 @@ class _Exo2ScreenState extends State<Exo2Screen> {
   }
 }
 
-class Tile {
+class ImageTile {
   String imageURL;
   Alignment alignment;
-
-  Tile({required this.imageURL, required this.alignment});
+  ImageTile({required this.imageURL, required this.alignment});
 
   Widget croppedImageTile() {
     return FittedBox(
@@ -160,12 +182,11 @@ class Tile {
 
 class Exo4Screen extends StatelessWidget {
   const Exo4Screen({super.key});
-
   @override
   Widget build(BuildContext context) {
-    Tile tile = Tile(
+    ImageTile tile = ImageTile(
       imageURL: 'https://picsum.photos/512',
-      alignment: const Alignment(0, 0),
+      alignment: Alignment.center,
     );
 
     return Scaffold(
@@ -184,7 +205,10 @@ class Exo4Screen extends StatelessWidget {
             ),
             SizedBox(
               height: 200,
-              child: Image.network('https://picsum.photos/512', fit: BoxFit.cover),
+              child: Image.network(
+                'https://picsum.photos/512',
+                fit: BoxFit.cover,
+              ),
             ),
           ],
         ),
@@ -192,7 +216,7 @@ class Exo4Screen extends StatelessWidget {
     );
   }
 
-  Widget createTileWidgetFrom(Tile tile) {
+  Widget createTileWidgetFrom(ImageTile tile) {
     return InkWell(
       child: tile.croppedImageTile(),
       onTap: () {
@@ -202,21 +226,19 @@ class Exo4Screen extends StatelessWidget {
   }
 }
 
-// 📌 Exo 5 : Plateau de tuiles
 class Exo5Screen extends StatefulWidget {
   const Exo5Screen({super.key});
-
   @override
   _Exo5ScreenState createState() => _Exo5ScreenState();
 }
 
 class _Exo5ScreenState extends State<Exo5Screen> {
-  int gridSize = 3; // Taille initiale du puzzle (3x3)
+  int gridSize = 3;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Taquin board")),
+      appBar: AppBar(title: const Text("Exo 5 - Plateau de tuiles")),
       body: Column(
         children: [
           Expanded(
@@ -224,9 +246,11 @@ class _Exo5ScreenState extends State<Exo5Screen> {
               future: loadImage('https://picsum.photos/512'),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text("Erreur de chargement de l'image"));
+                  return const Center(
+                    child: Text("Erreur de chargement de l'image"),
+                  );
                 } else {
                   return buildGrid(snapshot.data!);
                 }
@@ -250,10 +274,9 @@ class _Exo5ScreenState extends State<Exo5Screen> {
   }
 
   Widget buildGrid(ui.Image image) {
-    // Calcul de la taille de chaque tile (sans espacement)
     double tileSize = image.width / gridSize;
     return GridView.builder(
-      padding: EdgeInsets.all(2.0),
+      padding: const EdgeInsets.all(2.0),
       itemCount: gridSize * gridSize,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: gridSize,
@@ -276,14 +299,12 @@ class _Exo5ScreenState extends State<Exo5Screen> {
   Future<ui.Image> loadImage(String url) async {
     final completer = Completer<ui.Image>();
     final image = NetworkImage(url);
-    final stream = image.resolve(ImageConfiguration());
-
+    final stream = image.resolve(const ImageConfiguration());
     stream.addListener(
       ImageStreamListener((ImageInfo info, bool _) {
         completer.complete(info.image);
       }),
     );
-
     return completer.future;
   }
 }
@@ -292,12 +313,203 @@ class ImageTilePainter extends CustomPainter {
   final ui.Image image;
   final int row, col;
   final double tileSize;
-
   ImageTilePainter(this.image, this.row, this.col, this.tileSize);
-
   @override
   void paint(Canvas canvas, Size size) {
-    Rect srcRect = Rect.fromLTWH(col * tileSize, row * tileSize, tileSize, tileSize);
+    Rect srcRect = Rect.fromLTWH(
+      col * tileSize,
+      row * tileSize,
+      tileSize,
+      tileSize,
+    );
+    Rect dstRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawImageRect(image, srcRect, dstRect, Paint());
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class Exo6Screen extends StatefulWidget {
+  const Exo6Screen({super.key});
+  @override
+  _Exo6ScreenState createState() => _Exo6ScreenState();
+}
+
+class _Exo6ScreenState extends State<Exo6Screen> {
+  int _gridSize = 3;
+  List<int> _tileIndices = [];
+  int? _selectedTileIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTiles();
+  }
+
+  void _initTiles() {
+    _tileIndices = List.generate(_gridSize * _gridSize, (index) => index);
+  }
+
+  void _handleTileTap(int index) {
+    setState(() {
+      if (_selectedTileIndex == null) {
+        _selectedTileIndex = index;
+      } else if (_selectedTileIndex == index) {
+        _selectedTileIndex = null;
+      } else {
+        int row1 = _selectedTileIndex! ~/ _gridSize;
+        int col1 = _selectedTileIndex! % _gridSize;
+        int row2 = index ~/ _gridSize;
+        int col2 = index % _gridSize;
+        if ((row1 - row2).abs() + (col1 - col2).abs() == 1) {
+          int temp = _tileIndices[index];
+          _tileIndices[index] = _tileIndices[_selectedTileIndex!];
+          _tileIndices[_selectedTileIndex!] = temp;
+          _selectedTileIndex = null;
+        } else {
+          _selectedTileIndex = index;
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Exo 6 - Échange de tuiles d'image")),
+      body: Column(
+        children: [
+          Expanded(
+            child: FutureBuilder<ui.Image>(
+              future: loadImage('https://picsum.photos/512'),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text("Erreur de chargement de l'image"),
+                  );
+                } else {
+                  return buildSwapGrid(snapshot.data!);
+                }
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                const Text(
+                  "Taille du plateau :",
+                  style: TextStyle(fontSize: 18),
+                ),
+                Slider(
+                  min: 2,
+                  max: 6,
+                  divisions: 4,
+                  value: _gridSize.toDouble(),
+                  onChanged: (value) {
+                    setState(() {
+                      _gridSize = value.toInt();
+                      _initTiles();
+                    });
+                  },
+                  label: "$_gridSize x $_gridSize",
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildSwapGrid(ui.Image image) {
+    double tileSize = image.width / _gridSize;
+    return GridView.builder(
+      padding: const EdgeInsets.all(10),
+      itemCount: _gridSize * _gridSize,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _gridSize,
+        crossAxisSpacing: 5,
+        mainAxisSpacing: 5,
+      ),
+      itemBuilder: (context, index) {
+        int tileNumber = _tileIndices[index];
+        int sourceRow = tileNumber ~/ _gridSize;
+        int sourceCol = tileNumber % _gridSize;
+
+        BoxDecoration decoration = const BoxDecoration();
+        if (_selectedTileIndex != null) {
+          int selectedRow = _selectedTileIndex! ~/ _gridSize;
+          int selectedCol = _selectedTileIndex! % _gridSize;
+          if (index == _selectedTileIndex) {
+            decoration = BoxDecoration(
+              border: Border.all(color: Colors.blue, width: 3),
+            );
+          } else {
+            int row = index ~/ _gridSize;
+            int col = index % _gridSize;
+            if ((selectedRow - row).abs() + (selectedCol - col).abs() == 1) {
+              decoration = BoxDecoration(
+                border: Border.all(color: Colors.red, width: 3),
+              );
+            }
+          }
+        }
+        return GestureDetector(
+          onTap: () => _handleTileTap(index),
+          child: Container(
+            decoration: decoration,
+            child: ClipRect(
+              child: CustomPaint(
+                size: Size(tileSize, tileSize),
+                painter: ImageTileSwapPainter(
+                  image,
+                  sourceRow,
+                  sourceCol,
+                  tileSize,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<ui.Image> loadImage(String url) async {
+    final completer = Completer<ui.Image>();
+    final image = NetworkImage(url);
+    final stream = image.resolve(const ImageConfiguration());
+    stream.addListener(
+      ImageStreamListener((ImageInfo info, bool _) {
+        completer.complete(info.image);
+      }),
+    );
+    return completer.future;
+  }
+}
+
+class ImageTileSwapPainter extends CustomPainter {
+  final ui.Image image;
+  final int sourceRow, sourceCol;
+  final double tileSize;
+  ImageTileSwapPainter(
+    this.image,
+    this.sourceRow,
+    this.sourceCol,
+    this.tileSize,
+  );
+  @override
+  void paint(Canvas canvas, Size size) {
+    Rect srcRect = Rect.fromLTWH(
+      sourceCol * tileSize,
+      sourceRow * tileSize,
+      tileSize,
+      tileSize,
+    );
     Rect dstRect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.drawImageRect(image, srcRect, dstRect, Paint());
   }
