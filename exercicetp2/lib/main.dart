@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -209,59 +211,97 @@ class Exo5Screen extends StatefulWidget {
 }
 
 class _Exo5ScreenState extends State<Exo5Screen> {
-  int _gridSize = 3; // Taille du plateau (3x3 par défaut)
+  int gridSize = 3; // Taille initiale du puzzle (3x3)
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Exo 5 - Plateau de tuiles")),
+      appBar: AppBar(title: Text("Taquin board")),
       body: Column(
         children: [
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(10),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: _gridSize,
-                childAspectRatio: 1,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 5,
-              ),
-              itemCount: _gridSize * _gridSize,
-              itemBuilder: (context, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Tuile ${index + 1}",
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                );
+            child: FutureBuilder<ui.Image>(
+              future: loadImage('https://picsum.photos/512'),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("Erreur de chargement de l'image"));
+                } else {
+                  return buildGrid(snapshot.data!);
+                }
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                const Text("Taille du plateau :", style: TextStyle(fontSize: 18)),
-                Slider(
-                  min: 2,
-                  max: 6,
-                  divisions: 4,
-                  value: _gridSize.toDouble(),
-                  onChanged: (value) {
-                    setState(() => _gridSize = value.toInt());
-                  },
-                  label: "$_gridSize x $_gridSize",
-                ),
-              ],
-            ),
+          Slider(
+            min: 2,
+            max: 7,
+            divisions: 5,
+            value: gridSize.toDouble(),
+            onChanged: (value) {
+              setState(() {
+                gridSize = value.toInt();
+              });
+            },
           ),
         ],
       ),
     );
   }
+
+  Widget buildGrid(ui.Image image) {
+    // Calcul de la taille de chaque tile (sans espacement)
+    double tileSize = image.width / gridSize;
+    return GridView.builder(
+      padding: EdgeInsets.all(2.0),
+      itemCount: gridSize * gridSize,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: gridSize,
+        crossAxisSpacing: 2.0,
+        mainAxisSpacing: 2.0,
+      ),
+      itemBuilder: (context, index) {
+        int row = index ~/ gridSize;
+        int col = index % gridSize;
+        return ClipRect(
+          child: CustomPaint(
+            size: Size(tileSize, tileSize),
+            painter: ImageTilePainter(image, row, col, tileSize),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<ui.Image> loadImage(String url) async {
+    final completer = Completer<ui.Image>();
+    final image = NetworkImage(url);
+    final stream = image.resolve(ImageConfiguration());
+
+    stream.addListener(
+      ImageStreamListener((ImageInfo info, bool _) {
+        completer.complete(info.image);
+      }),
+    );
+
+    return completer.future;
+  }
+}
+
+class ImageTilePainter extends CustomPainter {
+  final ui.Image image;
+  final int row, col;
+  final double tileSize;
+
+  ImageTilePainter(this.image, this.row, this.col, this.tileSize);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Rect srcRect = Rect.fromLTWH(col * tileSize, row * tileSize, tileSize, tileSize);
+    Rect dstRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawImageRect(image, srcRect, dstRect, Paint());
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
