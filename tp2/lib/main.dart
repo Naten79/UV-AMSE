@@ -79,6 +79,15 @@ class HomeScreen extends StatelessWidget {
                 );
               },
             ),
+            ListTile(
+              title: const Text("Exo 7 - Jeu de taquin"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Exo7Screen()),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -428,6 +437,7 @@ class _Exo6ScreenState extends State<Exo6Screen> {
   Widget buildSwapGrid(ui.Image image) {
     double tileSize = image.width / _gridSize;
     return GridView.builder(
+      key: ValueKey(_tileIndices.join(',')),
       padding: const EdgeInsets.all(10),
       itemCount: _gridSize * _gridSize,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -439,7 +449,6 @@ class _Exo6ScreenState extends State<Exo6Screen> {
         int tileNumber = _tileIndices[index];
         int sourceRow = tileNumber ~/ _gridSize;
         int sourceCol = tileNumber % _gridSize;
-
         BoxDecoration decoration = const BoxDecoration();
         if (_selectedTileIndex != null) {
           int selectedRow = _selectedTileIndex! ~/ _gridSize;
@@ -516,4 +525,246 @@ class ImageTileSwapPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class Exo7Screen extends StatefulWidget {
+  const Exo7Screen({super.key});
+  @override
+  _Exo7ScreenState createState() => _Exo7ScreenState();
+}
+
+class _Exo7ScreenState extends State<Exo7Screen> {
+  int _gridSize = 3;
+  List<int> _tiles = [];
+  int _moveCount = 0;
+  List<List<int>> _history = [];
+  bool _solved = false;
+
+  late Future<ui.Image> _imageFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initBoard();
+    _imageFuture = _loadImage('https://picsum.photos/512');
+  }
+
+  void _initBoard() {
+    _tiles = _solvedState();
+    _moveCount = 0;
+    _history = [];
+    _solved = true;
+  }
+
+  List<int> _solvedState() {
+    List<int> state = List.generate(_gridSize * _gridSize, (index) => index);
+    state[_gridSize * _gridSize - 1] = -1;
+    return state;
+  }
+
+  int _emptyTileIndex() {
+    return _tiles.indexWhere((element) => element == -1);
+  }
+
+  bool _canMove(int index) {
+    int emptyIndex = _emptyTileIndex();
+    int rowEmpty = emptyIndex ~/ _gridSize;
+    int colEmpty = emptyIndex % _gridSize;
+    int rowTile = index ~/ _gridSize;
+    int colTile = index % _gridSize;
+    return ((rowEmpty - rowTile).abs() + (colEmpty - colTile).abs() == 1);
+  }
+
+  void _moveTile(int index) {
+    if (!_canMove(index)) return;
+    setState(() {
+      _history.add(List.from(_tiles));
+      int emptyIndex = _emptyTileIndex();
+      int temp = _tiles[index];
+      _tiles[index] = _tiles[emptyIndex];
+      _tiles[emptyIndex] = temp;
+      _moveCount++;
+      _solved = _checkSolved();
+    });
+  }
+
+  bool _checkSolved() {
+    List<int> solved = _solvedState();
+    for (int i = 0; i < _tiles.length; i++) {
+      if (_tiles[i] != solved[i]) return false;
+    }
+    return true;
+  }
+
+  void _undoMove() {
+    if (_history.isNotEmpty) {
+      setState(() {
+        _tiles = _history.removeLast();
+        _moveCount--;
+        _solved = _checkSolved();
+      });
+    }
+  }
+
+  int _inversionCount(List<int> tiles) {
+    int invCount = 0;
+    for (int i = 0; i < tiles.length; i++) {
+      for (int j = i + 1; j < tiles.length; j++) {
+        if (tiles[i] != -1 && tiles[j] != -1 && tiles[i] > tiles[j]) {
+          invCount++;
+        }
+      }
+    }
+    return invCount;
+  }
+
+  bool _isSolvable(List<int> tiles) {
+    return _inversionCount(tiles) % 2 == 0;
+  }
+
+  void _shuffleBoard() {
+    setState(() {
+      List<int> newTiles;
+      do {
+        List<int> permutation = List.generate(
+          _gridSize * _gridSize - 1,
+          (i) => i,
+        );
+        permutation.shuffle();
+        newTiles = List.from(permutation);
+        newTiles.add(-1);
+      } while (!_isSolvable(newTiles));
+      _tiles = newTiles;
+      _moveCount = 0;
+      _history = [];
+      _solved = _checkSolved();
+    });
+  }
+
+  Future<ui.Image> _loadImage(String url) async {
+    final completer = Completer<ui.Image>();
+    final image = NetworkImage(url);
+    final stream = image.resolve(const ImageConfiguration());
+    stream.addListener(
+      ImageStreamListener((ImageInfo info, bool _) {
+        completer.complete(info.image);
+      }),
+    );
+    return completer.future;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Exo 7 - Jeu de taquin")),
+      body: Column(
+        children: [
+          Expanded(
+            child: FutureBuilder<ui.Image>(
+              future: _imageFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text("Erreur de chargement de l'image"),
+                  );
+                } else {
+                  return _buildBoard(snapshot.data!);
+                }
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text("Nombre de déplacements: $_moveCount"),
+          ),
+          if (_solved)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Félicitations, vous avez gagné!",
+                style: TextStyle(color: Colors.green, fontSize: 20),
+              ),
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: _undoMove,
+                child: const Text("Annuler"),
+              ),
+              ElevatedButton(
+                onPressed: _shuffleBoard,
+                child: const Text("Mélanger"),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const Text("Taille du plateau:"),
+              Slider(
+                min: 3,
+                max: 6,
+                divisions: 3,
+                value: _gridSize.toDouble(),
+                label: "$_gridSize x $_gridSize",
+                onChanged: (value) {
+                  setState(() {
+                    _gridSize = value.toInt();
+                    _initBoard();
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBoard(ui.Image image) {
+    double tileSize = image.width / _gridSize;
+    return GridView.builder(
+      key: ValueKey(_tiles.join(',')),
+      padding: const EdgeInsets.all(8.0),
+      itemCount: _tiles.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _gridSize,
+        crossAxisSpacing: 2,
+        mainAxisSpacing: 2,
+      ),
+      itemBuilder: (context, index) {
+        int tileValue = _tiles[index];
+        if (tileValue == -1) {
+          return Container(color: Colors.grey[300]);
+        } else {
+          int sourceRow = tileValue ~/ _gridSize;
+          int sourceCol = tileValue % _gridSize;
+          return GestureDetector(
+            onTap: () {
+              _moveTile(index);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 1),
+              ),
+              child: ClipRect(
+                child: CustomPaint(
+                  size: Size(tileSize, tileSize),
+                  painter: ImageTileSwapPainter(
+                    image,
+                    sourceRow,
+                    sourceCol,
+                    tileSize,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
 }
