@@ -725,7 +725,7 @@ class _Exo7ScreenState extends State<Exo7Screen> {
                     _initBoard();
                   });
                 },
-                child: const Text("Changer d'image"),
+                child: const Text("Suivant"),
               ),
             ],
           ),
