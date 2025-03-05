@@ -158,11 +158,6 @@ class _Exo2ScreenState extends State<Exo2Screen> {
             value: _scale,
             onChanged: (value) => setState(() => _scale = value),
           ),
-          SwitchListTile(
-            title: const Text("Effet miroir"),
-            value: _mirror,
-            onChanged: (value) => setState(() => _mirror = value),
-          ),
         ],
       ),
     );
@@ -549,7 +544,7 @@ class _Exo7ScreenState extends State<Exo7Screen> {
     _loadNewImage();
   }
 
-  // Méthode pour charger une nouvelle image avec une seed aléatoire
+  
   void _loadNewImage() {
     String url = 'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/512';
     _imageFuture = _loadImage(url);
@@ -627,16 +622,13 @@ class _Exo7ScreenState extends State<Exo7Screen> {
   bool _isSolvable(List<int> tiles) {
     int invCount = _inversionCount(tiles);
     if (_gridSize % 2 == 1) {
-      // Grille impaire : le nombre d'inversions doit être pair.
+      // conditions pour savoir si c'est résolvable
       return invCount % 2 == 0;
     } else {
-      // Grille paire : on doit tenir compte de la position de la tuile vide.
+
       int emptyIndex = _emptyTileIndex();
-      // Ligne (0-indexée) où se trouve la tuile vide
       int blankRowFromTop = emptyIndex ~/ _gridSize;
-      // Position depuis le bas (1-indexée)
       int blankRowFromBottom = _gridSize - blankRowFromTop;
-      // Configuration résolvable si (inversions + blankRowFromBottom) est impair.
       return ((invCount + blankRowFromBottom) % 2 == 1);
     }
   }
