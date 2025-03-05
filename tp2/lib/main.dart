@@ -546,7 +546,13 @@ class _Exo7ScreenState extends State<Exo7Screen> {
   void initState() {
     super.initState();
     _initBoard();
-    _imageFuture = _loadImage('https://picsum.photos/512');
+    _loadNewImage();
+  }
+
+  // Méthode pour charger une nouvelle image avec une seed aléatoire
+  void _loadNewImage() {
+    String url = 'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/512';
+    _imageFuture = _loadImage(url);
   }
 
   void _initBoard() {
@@ -619,7 +625,20 @@ class _Exo7ScreenState extends State<Exo7Screen> {
   }
 
   bool _isSolvable(List<int> tiles) {
-    return _inversionCount(tiles) % 2 == 0;
+    int invCount = _inversionCount(tiles);
+    if (_gridSize % 2 == 1) {
+      // Grille impaire : le nombre d'inversions doit être pair.
+      return invCount % 2 == 0;
+    } else {
+      // Grille paire : on doit tenir compte de la position de la tuile vide.
+      int emptyIndex = _emptyTileIndex();
+      // Ligne (0-indexée) où se trouve la tuile vide
+      int blankRowFromTop = emptyIndex ~/ _gridSize;
+      // Position depuis le bas (1-indexée)
+      int blankRowFromBottom = _gridSize - blankRowFromTop;
+      // Configuration résolvable si (inversions + blankRowFromBottom) est impair.
+      return ((invCount + blankRowFromBottom) % 2 == 1);
+    }
   }
 
   void _shuffleBoard() {
@@ -665,10 +684,6 @@ class _Exo7ScreenState extends State<Exo7Screen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return const Center(
-                    child: Text("Erreur de chargement de l'image"),
-                  );
                 } else {
                   return _buildBoard(snapshot.data!);
                 }
@@ -680,8 +695,8 @@ class _Exo7ScreenState extends State<Exo7Screen> {
             child: Text("Nombre de déplacements: $_moveCount"),
           ),
           if (_solved)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
               child: Text(
                 "Félicitations, vous avez gagné!",
                 style: TextStyle(color: Colors.green, fontSize: 20),
@@ -697,6 +712,15 @@ class _Exo7ScreenState extends State<Exo7Screen> {
               ElevatedButton(
                 onPressed: _shuffleBoard,
                 child: const Text("Mélanger"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _loadNewImage();
+                    _initBoard();
+                  });
+                },
+                child: const Text("Rafraîchir l'image"),
               ),
             ],
           ),
@@ -768,3 +792,4 @@ class _Exo7ScreenState extends State<Exo7Screen> {
     );
   }
 }
+
