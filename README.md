@@ -5,7 +5,8 @@
 ```
 git clone http://www.github.com/Naten79/UV-AMSE.git
 cd UV-AMSE/tp1
-flutter create .e
+flutter upgrade
+flutter pub get
 flutter run
 ```
 
@@ -19,6 +20,7 @@ flutter run
 ```
 git clone http://www.github.com/Naten79/UV-AMSE.git
 cd UV-AMSE/tp2
-flutter create .
+flutter upgrade
+flutter pub get
 flutter run
 ```

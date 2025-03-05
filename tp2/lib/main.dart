@@ -237,7 +237,7 @@ class Exo5Screen extends StatefulWidget {
 }
 
 class _Exo5ScreenState extends State<Exo5Screen> {
-  int gridSize = 3;
+  int gridSize = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +341,7 @@ class Exo6Screen extends StatefulWidget {
 }
 
 class _Exo6ScreenState extends State<Exo6Screen> {
-  int _gridSize = 3;
+  int _gridSize = 2;
   List<int> _tileIndices = [];
   int? _selectedTileIndex;
 
@@ -529,7 +529,7 @@ class Exo7Screen extends StatefulWidget {
 }
 
 class _Exo7ScreenState extends State<Exo7Screen> {
-  int _gridSize = 3;
+  int _gridSize = 2;
   List<int> _tiles = [];
   int _moveCount = 0;
   List<List<int>> _history = [];
@@ -622,7 +622,6 @@ class _Exo7ScreenState extends State<Exo7Screen> {
   bool _isSolvable(List<int> tiles) {
     int invCount = _inversionCount(tiles);
     if (_gridSize % 2 == 1) {
-      // conditions pour savoir si c'est résolvable
       return invCount % 2 == 0;
     } else {
 
@@ -664,6 +663,7 @@ class _Exo7ScreenState extends State<Exo7Screen> {
     return completer.future;
   }
 
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -676,8 +676,21 @@ class _Exo7ScreenState extends State<Exo7Screen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text("Erreur de chargement de l'image"));
                 } else {
-                  return _buildBoard(snapshot.data!);
+                  if (_solved) {
+                    return Center(
+                      child: RawImage(
+                        image: snapshot.data,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    );
+                  } else {
+                    return _buildBoard(snapshot.data!);
+                  }
                 }
               },
             ),
@@ -703,7 +716,7 @@ class _Exo7ScreenState extends State<Exo7Screen> {
               ),
               ElevatedButton(
                 onPressed: _shuffleBoard,
-                child: const Text("Mélanger"),
+                child: const Text("Génerer taquin"),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -712,7 +725,7 @@ class _Exo7ScreenState extends State<Exo7Screen> {
                     _initBoard();
                   });
                 },
-                child: const Text("Rafraîchir l'image"),
+                child: const Text("Changer d'image"),
               ),
             ],
           ),
@@ -721,7 +734,7 @@ class _Exo7ScreenState extends State<Exo7Screen> {
             children: [
               const Text("Taille du plateau:"),
               Slider(
-                min: 3,
+                min: 2,
                 max: 6,
                 divisions: 3,
                 value: _gridSize.toDouble(),
@@ -739,6 +752,7 @@ class _Exo7ScreenState extends State<Exo7Screen> {
       ),
     );
   }
+
 
   Widget _buildBoard(ui.Image image) {
     double tileSize = image.width / _gridSize;
